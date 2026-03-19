@@ -26,6 +26,8 @@
 #include <string.h>
 
 #include "esp_at.h"
+#include "at_custom_hid_cmd.h"
+#include "at_custom_zigbee_cmd.h"
 
 #ifdef CONFIG_AT_BASE_ON_SPI
 #include "freertos/FreeRTOS.h"
@@ -60,6 +62,7 @@ static const char* TAG = "SPI-AT";
 #define SPI_WRITE_STREAM_BUFFER     CONFIG_TX_STREAM_BUFFER_SIZE
 #define SPI_READ_STREAM_BUFFER      CONFIG_RX_STREAM_BUFFER_SIZE
 #define SLAVE_CONFIG_ADDR           4
+
 
 typedef enum {
     SPI_NULL = 0,
@@ -279,6 +282,7 @@ static void at_spi_slave_task(void* pvParameters)
             slave_trans.len = send_len;
             ESP_ERROR_CHECK(spi_slave_hd_queue_trans(SLAVE_HOST, SPI_SLAVE_CHAN_TX, &slave_trans, portMAX_DELAY));
             gpio_set_level(SPI_SLAVE_HANDSHARK_GPIO, 1); // it means slave send done and notify master to recv
+
             ESP_ERROR_CHECK(spi_slave_hd_get_trans_res(SLAVE_HOST, SPI_SLAVE_CHAN_TX, &ret_trans, portMAX_DELAY));
 
             spi_mutex_lock();
@@ -419,6 +423,8 @@ void at_custom_init(void)
         ESP_LOGE(TAG, "Semaphore create error");
         return;
     }
+    esp_at_custom_hid_cmd_register();
+    esp_at_custom_zigbee_cmd_register();
     xTaskCreate(at_spi_slave_task , "at_spi_task" , 4096 , NULL , 10 , NULL);
 }
 #endif

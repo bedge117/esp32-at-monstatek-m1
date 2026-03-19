@@ -39,6 +39,8 @@
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "at_interface.h"
+#include "at_custom_hid_cmd.h"
+#include "at_custom_zigbee_cmd.h"
 
 #ifdef CONFIG_IDF_TARGET_ESP32
 #include "esp32/rom/uart.h"
@@ -748,6 +750,8 @@ void at_interface_init (void)
 void at_custom_init(void)
 {
     esp_at_custom_cmd_array_regist (at_custom_cmd, sizeof(at_custom_cmd)/sizeof(at_custom_cmd[0]));
+    esp_at_custom_hid_cmd_register();
+    esp_at_custom_zigbee_cmd_register();
     esp_at_port_active_write_data((uint8_t *)"\r\nready\r\n",strlen("\r\nready\r\n"));
 }
 #endif
